@@ -26,7 +26,7 @@ import scala.collection.JavaConversions
  */
 private[configgy] object EnvironmentAttributes extends ConfigMap {
 
-  private val env = immutable.Map.empty[String, String] ++ (JavaConversions.asMap(System.getenv()).elements)
+  private var env = immutable.Map.empty[String, String] ++ (JavaConversions.asMap(System.getenv()).elements)
 
   // deal with java.util.Properties extending
   // java.util.Hashtable[Object, Object] and not
@@ -81,10 +81,10 @@ private[configgy] object EnvironmentAttributes extends ConfigMap {
     val dns = addr.getHostName
 
     if (ip ne null) {
-      env("HOSTIP") = ip
+      env = env.updated("HOSTIP", ip)
     }
     if (dns ne null) {
-      env("HOSTNAME") = dns
+      env = env.updated("HOSTNAME", dns)
     }
   } catch {
     case _ => // pass

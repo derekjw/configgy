@@ -291,11 +291,11 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
     var ret = immutable.Map.empty[String, String]
     for ((key, value) <- cells) {
       value match {
-        case StringCell(x) => ret = ret.update(key, x)
-        case StringListCell(x) => ret = ret.update(key, x.mkString("[", ",", "]"))
+        case StringCell(x) => ret = ret.updated(key, x)
+        case StringListCell(x) => ret = ret.updated(key, x.mkString("[", ",", "]"))
         case AttributesCell(x) =>
           for ((k, v) <- x.asMap) {
-            ret = ret.update(key + "." + k, v)
+            ret = ret.updated(key + "." + k, v)
           }
       }
     }
