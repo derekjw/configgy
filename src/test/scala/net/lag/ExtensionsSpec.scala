@@ -17,7 +17,7 @@
 package net.lag
 
 import net.lag.extensions._
-import org.specs._
+import org.specs2.mutable.Specification
 
 
 class ExtensionsSpec extends Specification {

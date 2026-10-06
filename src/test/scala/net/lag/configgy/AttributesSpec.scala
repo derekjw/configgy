@@ -16,8 +16,8 @@
 
 package net.lag.configgy
 
+import org.specs2.mutable.Specification
 import scala.util.Sorting
-import org.specs._
 
 
 class AttributesSpec extends Specification {
@@ -98,10 +98,10 @@ class AttributesSpec extends Specification {
       s("diet.food") = "Meow Mix"
       s("diet.liquid") = "water"
       s.toString mustEqual "{: age=\"8\" diet={diet: food=\"Meow Mix\" liquid=\"water\" } name=\"Communist\" }"
-      s.contains("age") mustBe true
-      s.contains("unknown") mustBe false
-      s.contains("diet.food") mustBe true
-      s.contains("diet.gas") mustBe false
+      s.contains("age") must beTrue
+      s.contains("unknown") must beFalse
+      s.contains("diet.food") must beTrue
+      s.contains("diet.gas") must beFalse
       s.toString mustEqual "{: age=\"8\" diet={diet: food=\"Meow Mix\" liquid=\"water\" } name=\"Communist\" }"
     }
 
@@ -109,7 +109,7 @@ class AttributesSpec extends Specification {
       val s = new Attributes(null, "")
       s("a.b.c") = 8
       s.toString mustEqual "{: a={a: b={a.b: c=\"8\" } } }"
-      s.getString("a.d.x") mustBe None
+      s.getString("a.d.x") must beNone
       // shouldn't have changed the attr map:
       s.toString mustEqual "{: a={a: b={a.b: c=\"8\" } } }"
     }
@@ -133,8 +133,8 @@ class AttributesSpec extends Specification {
       s("diet.food") = "Meow Mix"
       s("diet.liquid") = "water"
       s.toString mustEqual "{: age=\"8\" diet={diet: food=\"Meow Mix\" liquid=\"water\" } name=\"Communist\" }"
-      s.remove("diet.food") mustBe true
-      s.remove("diet.food") mustBe false
+      s.remove("diet.food") must beTrue
+      s.remove("diet.food") must beFalse
       s.toString mustEqual "{: age=\"8\" diet={diet: liquid=\"water\" } name=\"Communist\" }"
     }
 

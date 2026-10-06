@@ -17,11 +17,6 @@
 package net.lag
 
 import _root_.java.io.File
-import _root_.org.specs.runner.SpecsFileRunner
-
-
-object TestRunner extends SpecsFileRunner("src/test/scala/**/*.scala", ".*",
-  System.getProperty("system", ".*"), System.getProperty("example", ".*"))
 
 
 trait TestHelper {
@@ -39,7 +34,7 @@ trait TestHelper {
     folder.delete
   }
 
-  def withTempFolder(f: => Any): Unit = {
+  def withTempFolder[A](f: => A): A = {
     val tempFolder = System.getProperty("java.io.tmpdir")
     var folder: File = null
     do {

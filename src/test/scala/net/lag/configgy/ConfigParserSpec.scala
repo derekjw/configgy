@@ -16,8 +16,8 @@
 
 package net.lag.configgy
 
-import org.specs._
 import net.lag.extensions._
+import org.specs2.mutable.Specification
 
 
 class ConfigParserSpec extends Specification {
@@ -241,7 +241,7 @@ class ConfigParserSpec extends Specification {
     }
 
     "interpolate environment vars" in {
-      parse("user=\"$(USER)\"").toString must beDifferent("{: user=\"$(USER)\" }")
+      parse("user=\"$(USER)\"").toString must_!=("{: user=\"$(USER)\" }")
     }
 
     "interpolate properties" in {
@@ -459,8 +459,8 @@ class ConfigParserSpec extends Specification {
       val a = parse(data)
       a.configMap("sanfrancisco").inheritFrom mustEqual None
       a.configMap("sanfrancisco.beer").inheritFrom mustEqual None
-      a.configMap("atlanta").inheritFrom.get.toString mustMatch "sanfrancisco.*"
-      a.configMap("atlanta.beer").inheritFrom.get.toString mustMatch "sanfrancisco\\.beer.*"
+      a.configMap("atlanta").inheritFrom.get.toString must find("sanfrancisco.*")
+      a.configMap("atlanta.beer").inheritFrom.get.toString must find("sanfrancisco\\.beer.*")
       a.getString("sanfrancisco.beer.deathandtaxes.etc") mustEqual None
     }
 
