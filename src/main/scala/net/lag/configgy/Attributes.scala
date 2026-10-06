@@ -279,7 +279,7 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
     recurse(key) match {
       case Some((attr, name)) => attr.remove(name)
       case None => {
-        cells.removeKey(key) match {
+        cells.remove(key) match {
           case Some(_) => true
           case None => false
         }
@@ -390,7 +390,7 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
       case Some(a: Attributes) => a.copyInto(attr)
       case _ =>
     }
-    for ((key, value) <- cells.elements) {
+    for ((key, value) <- cells) {
       value match {
         case StringCell(x) => attr(key) = x
         case StringListCell(x) => attr(key) = x

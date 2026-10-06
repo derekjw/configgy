@@ -17,10 +17,12 @@
 package net.lag.configgy
 
 import _root_.java.io.{BufferedReader, InputStreamReader, File, FileInputStream, FileOutputStream}
-import _root_.org.specs._
+import _root_.org.specs2.mutable.Specification
 import net.lag.TestHelper
 
 class ConfiggySpec extends Specification with TestHelper {
+  // Examples share the global Configgy.config.
+  sequential
 
   private def writeConfigFile(filename: String, data: String) = {
     val f = new FileOutputStream(folderName + "/" + filename)
@@ -175,7 +177,7 @@ class ConfiggySpec extends Specification with TestHelper {
         var checkedAlso = false
         Configgy.config.subscribe("robot") { (attr: Option[ConfigMap]) => checked = true }
         Configgy.config.subscribe("unchanged") { (attr: Option[ConfigMap]) => checkedAlso = true }
-        checked mustBe false
+        checked must beFalse
 
         val data2 =
           "<robot>\n" +
@@ -190,8 +192,8 @@ class ConfiggySpec extends Specification with TestHelper {
         Configgy.reload
 
         // all subscribers (even for unchanged nodes) should be called.
-        checked mustBe true
-        checkedAlso mustBe true
+        checked must beTrue
+        checkedAlso must beTrue
         Configgy.config.getInt("robot.age", 0) mustEqual 23003
       }
     }

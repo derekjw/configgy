@@ -7,3 +7,5 @@ src_managed/
 project/plugins/project/
 project/boot/
 Makefile
+.lib
+tags

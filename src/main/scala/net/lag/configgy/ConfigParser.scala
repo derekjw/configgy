@@ -41,10 +41,36 @@ private[configgy] class ConfigParser(var attr: Attributes, val importer: Importe
   // Stack reversed iteration order from 2.7 to 2.8!!
   def sectionsString = sections.toList.reverse.mkString(".")
 
-  // tokens
-  override val whiteSpace = """(\s+|#[^\n]*\n)+""".r
+  // whiteSpace and stringToken can span very long input. java.util.regex recurses once per
+  // iteration of a greedy group loop such as (a|b)* to keep a backtracking point, overflowing
+  // the stack after a few thousand characters. Instead each is an "unrolled loop":
+  //
+  //   filler*+ (separator filler*+)*+
+  //
+  // filler is a single character class, which a quantifier matches without recursion.
+  // separator is a comment or escape sequence. Every quantifier is possessive (*+), which keeps
+  // no backtracking points, so the group loop doesn't recurse either. That is safe because
+  // filler and separator never match at the same position, so backtracking couldn't find
+  // another match.
+
+  override val whiteSpace = {
+    val blanks = """\s*+"""
+    // Must end in a newline, so a trailing comment without one is a parse error.
+    val comment = """#[^\n]*+\n"""
+    // May match empty, which skips nothing, same as no match.
+    (blanks + "(?:" + comment + blanks + ")*+").r
+  }
+
   val numberToken: Parser[String] = """-?\d+(\.\d+)?""".r
-  val stringToken: Parser[String] = ("\"" + """([^\\\"]|\\[^ux]|\\\n|\\u[0-9a-fA-F]{4}|\\x[0-9a-fA-F]{2})*""" + "\"").r
+
+  val stringToken: Parser[String] = {
+    val plainChars = """[^\\"]*+"""
+    // Backslash followed by u and 4 hex digits, x and 2 hex digits, or any other character
+    // (including a newline).
+    val escape = """\\(?:u[0-9a-fA-F]{4}|x[0-9a-fA-F]{2}|[^ux])"""
+    ("\"" + plainChars + "(?:" + escape + plainChars + ")*+" + "\"").r
+  }
+
   val identToken: Parser[String] = """([\da-zA-Z_][-\w]*)(\.[a-zA-Z_][-\w]*)*""".r
   val assignToken: Parser[String] = """=|\?=""".r
   val tagNameToken: Parser[String] = """[a-zA-Z][-\w]*""".r

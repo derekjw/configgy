@@ -16,8 +16,8 @@
 
 package net.lag.configgy
 
-import org.specs._
 import net.lag.extensions._
+import org.specs2.mutable.Specification
 
 
 class ConfigParserSpec extends Specification {
@@ -212,6 +212,37 @@ class ConfigParserSpec extends Specification {
       parse("4 = \"hostname:1234\"").toString mustEqual "{: 4=\"hostname:1234\" }"
       parse("""4 = ["a", "b"]""").toString mustEqual """{: 4=[a,b] }"""
     }
+
+    // Far longer than needed to overflow a regex that recurses per character, so the
+    // check doesn't depend on the thread's stack size.
+    "parse long strings without recursing to death" in {
+      val plain = "x" * 100000
+      parse("long = \"" + plain + "\"")("long") mustEqual plain
+
+      val escaped = "\\\"\\u20ac\\x41\\n" * 25000
+      parse("long = \"" + escaped + "\"")("long") mustEqual "\"\u20acA\n" * 25000
+    }
+
+    "parse long string lists" in {
+      val plain = "x" * 100000
+      parse("long = [\"" + plain + "\", \"" + plain + "\"]").getList("long").toList mustEqual List(plain, plain)
+    }
+
+    "parse long runs of comments and whitespace without recursing to death" in {
+      parse("# comment\n" * 100000 + "weight = 48").toString mustEqual "{: weight=\"48\" }"
+      parse("# comment\n \t\n" * 100000 + "weight = 48").toString mustEqual "{: weight=\"48\" }"
+      parse("weight =" + " " * 100000 + "48").toString mustEqual "{: weight=\"48\" }"
+    }
+
+    "reject a trailing comment without a newline" in {
+      parse("weight = 48\n# comment") must throwA[ParseException]
+    }
+
+    "reject malformed escapes" in {
+      parse("bad = \"\\u12\"") must throwA[ParseException]
+      parse("bad = \"\\x4\"") must throwA[ParseException]
+      parse("bad = \"unterminated") must throwA[ParseException]
+    }
   }
 
 
@@ -241,7 +272,7 @@ class ConfigParserSpec extends Specification {
     }
 
     "interpolate environment vars" in {
-      parse("user=\"$(USER)\"").toString must beDifferent("{: user=\"$(USER)\" }")
+      parse("user=\"$(USER)\"").toString must_!=("{: user=\"$(USER)\" }")
     }
 
     "interpolate properties" in {
@@ -459,8 +490,8 @@ class ConfigParserSpec extends Specification {
       val a = parse(data)
       a.configMap("sanfrancisco").inheritFrom mustEqual None
       a.configMap("sanfrancisco.beer").inheritFrom mustEqual None
-      a.configMap("atlanta").inheritFrom.get.toString mustMatch "sanfrancisco.*"
-      a.configMap("atlanta.beer").inheritFrom.get.toString mustMatch "sanfrancisco\\.beer.*"
+      a.configMap("atlanta").inheritFrom.get.toString must find("sanfrancisco.*")
+      a.configMap("atlanta.beer").inheritFrom.get.toString must find("sanfrancisco\\.beer.*")
       a.getString("sanfrancisco.beer.deathandtaxes.etc") mustEqual None
     }
 

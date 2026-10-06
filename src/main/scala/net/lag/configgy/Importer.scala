@@ -53,7 +53,7 @@ trait Importer {
   protected def streamToString(in: InputStream): String = {
     val reader = new BufferedReader(new InputStreamReader(in, "UTF-8"))
     val buffer = new Array[Char](BUFFER_SIZE)
-    val out = new StringBuilder
+    val out = new java.lang.StringBuilder()
     var n = 0
     while (n >= 0) {
       n = reader.read(buffer, 0, buffer.length)

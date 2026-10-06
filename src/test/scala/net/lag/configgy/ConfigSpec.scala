@@ -20,8 +20,7 @@ import _root_.java.io.{File, FileOutputStream}
 import _root_.java.lang.management.ManagementFactory
 import _root_.javax.{management => jmx}
 import _root_.net.lag.TestHelper
-
-import org.specs._
+import _root_.org.specs2.mutable.Specification
 
 
 class ConfigSpec extends Specification with TestHelper {
@@ -76,9 +75,9 @@ class ConfigSpec extends Specification with TestHelper {
 
       var checked = false
       c.subscribe("alpha.beta") { (attr: Option[ConfigMap]) => checked = true }
-      checked mustBe false
+      checked must beFalse
       c("alpha.beta.delta") = "goodbye"
-      checked mustBe true
+      checked must beTrue
     }
 
     "call subscribers with the old & new data" in {
@@ -87,10 +86,10 @@ class ConfigSpec extends Specification with TestHelper {
 
       val sub = new MemorySubscriber
       c.subscribe("alpha.beta", sub)
-      sub.used mustBe false
+      sub.used must beFalse
 
       c("alpha.beta.delta") = "goodbye"
-      sub.used mustBe true
+      sub.used must beTrue
       sub.savedCurrent.get.toString mustEqual "{alpha.beta: gamma=\"hello\" }"
       sub.savedReplacement.get.toString mustEqual "{alpha.beta: delta=\"goodbye\" gamma=\"hello\" }"
       c.toString mustEqual "{: alpha={alpha: beta={alpha.beta: delta=\"goodbye\" gamma=\"hello\" } } }"
@@ -139,8 +138,8 @@ class ConfigSpec extends Specification with TestHelper {
       c.subscribe("alpha.beta", betasub)
 
       c("unrelated") = 39
-      rootsub.used mustBe true
-      betasub.used mustBe false
+      rootsub.used must beTrue
+      betasub.used must beFalse
       rootsub.savedCurrent.get.toString mustEqual
         "{: alpha={alpha: beta={alpha.beta: gamma=\"hello\" } giraffe=\"tall!\" } forest={forest: fires={forest.fires: are=\"bad\" } } }"
       rootsub.savedReplacement.get.toString mustEqual
@@ -148,8 +147,8 @@ class ConfigSpec extends Specification with TestHelper {
 
       rootsub.used = false
       c("forest.matches") = false
-      rootsub.used mustBe true
-      betasub.used mustBe false
+      rootsub.used must beTrue
+      betasub.used must beFalse
       c.getConfigMap("forest").get.toString mustEqual
         "{forest: fires={forest.fires: are=\"bad\" } matches=\"false\" }"
 
@@ -158,8 +157,8 @@ class ConfigSpec extends Specification with TestHelper {
       rootsub.used = false
       betasub.used = false
       c("alpha.beta.gamma") = "goodbye"
-      rootsub.used mustBe true
-      betasub.used mustBe true
+      rootsub.used must beTrue
+      betasub.used must beTrue
       betasub.savedCurrent.get.toString mustEqual "{alpha.beta: gamma=\"hello\" }"
       betasub.savedReplacement.get.toString mustEqual "{alpha.beta: gamma=\"goodbye\" }"
     }
@@ -185,7 +184,7 @@ class ConfigSpec extends Specification with TestHelper {
     }
 
     "load a test resource as a sanity check" in {
-      getClass.getClassLoader.getResource("happy.conf") mustNot beNull
+      getClass.getClassLoader.getResource("happy.conf") must not(beNull)
     }
 
     "include from a resource" in {

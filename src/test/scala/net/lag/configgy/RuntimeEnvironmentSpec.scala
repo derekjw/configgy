@@ -16,12 +16,14 @@
 
 package net.lag.configgy
 
-import net.lag.TestHelper
 import _root_.java.io._
-import _root_.org.specs._
+import _root_.org.specs2.mutable.Specification
+import net.lag.TestHelper
 
 
 class RuntimeEnvironmentSpec extends Specification with TestHelper {
+  // Examples share the global Configgy.config.
+  sequential
 
   private def writeConfigFile(filename: String, data: String) = {
     val f = new FileOutputStream(folderName + "/" + filename)
